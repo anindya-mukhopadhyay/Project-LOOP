@@ -5,3 +5,418 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Role {
+  ADMIN
+  ANALYST
+  VIEWER
+}
+
+enum FeedbackStatus {
+  NEW
+  REVIEWED
+  ACTIONED
+}
+
+enum Sentiment {
+  POSITIVE
+  NEGATIVE
+  NEUTRAL
+}
+
+enum Channel {
+  EMAIL
+  SURVEY
+  APP_STORE
+  PLAY_STORE
+  SUPPORT
+  SOCIAL
+  SALES
+  OTHER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum ReportStatus {
+  DRAFT
+  SCHEDULED
+  GENERATING
+  READY
+  FAILED
+  ARCHIVED
+}
+
+enum NotificationType {
+  FEEDBACK_ASSIGNED
+  THEME_DETECTED
+  REPORT_READY
+  INVITATION_SENT
+  SYSTEM
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+enum ConversationStatus {
+  OPEN
+  ARCHIVED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  INVITE
+  EXPORT
+  CLASSIFY
+  CLUSTER
+}
+
+model Workspace {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @db.VarChar(160)
+  slug      String    @unique @db.VarChar(80)
+  domain    String?   @db.VarChar(160)
+  plan      String    @default("starter") @db.VarChar(40)
+  metadata  Json      @default("{}")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  users         User[]
+  invitations   Invitation[]
+  feedback      Feedback[]
+  themes        Theme[]
+  feedbackTheme FeedbackTheme[]
+  embeddings    Embedding[]
+  reports       Report[]
+  notifications Notification[]
+  conversations Conversation[]
+  messages      Message[]
+  auditLogs     AuditLog[]
+
+  @@index([deletedAt])
+  @@index([slug, deletedAt])
+  @@map("workspaces")
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  workspaceId   String    @db.Uuid
+  email         String    @db.VarChar(255)
+  name          String?   @db.VarChar(160)
+  image         String?   @db.Text
+  role          Role      @default(VIEWER)
+  emailVerified DateTime?
+  lastSeenAt    DateTime?
+  metadata      Json      @default("{}")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  workspace              Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sentInvitations        Invitation[]   @relation("InvitationInviter")
+  createdFeedback        Feedback[]     @relation("FeedbackCreator")
+  assignedFeedback       Feedback[]     @relation("FeedbackAssignee")
+  createdThemes          Theme[]        @relation("ThemeCreator")
+  createdReports         Report[]       @relation("ReportCreator")
+  notifications          Notification[]
+  conversations          Conversation[]
+  messages               Message[]
+  auditLogs              AuditLog[]     @relation("AuditActor")
+  acceptedInvitations    Invitation[]   @relation("InvitationAcceptedBy")
+  readNotifications      Notification[] @relation("NotificationReadBy")
+
+  @@unique([workspaceId, email])
+  @@index([workspaceId, role, deletedAt])
+  @@index([workspaceId, createdAt])
+  @@index([email])
+  @@map("users")
+}
+
+model Invitation {
+  id           String           @id @default(uuid()) @db.Uuid
+  workspaceId  String           @db.Uuid
+  email        String           @db.VarChar(255)
+  role         Role             @default(VIEWER)
+  token        String           @unique @db.VarChar(128)
+  status       InvitationStatus @default(PENDING)
+  invitedById  String?          @db.Uuid
+  acceptedById String?          @db.Uuid
+  expiresAt    DateTime
+  acceptedAt   DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  deletedAt    DateTime?
+
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy  User?     @relation("InvitationInviter", fields: [invitedById], references: [id], onDelete: SetNull)
+  acceptedBy User?     @relation("InvitationAcceptedBy", fields: [acceptedById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status, expiresAt])
+  @@index([workspaceId, email])
+  @@index([invitedById])
+  @@map("invitations")
+}
+
+model Feedback {
+  id            String         @id @default(uuid()) @db.Uuid
+  workspaceId   String         @db.Uuid
+  externalId    String?        @db.VarChar(160)
+  customerEmail String?        @db.VarChar(255)
+  customerName  String?        @db.VarChar(160)
+  title         String         @db.VarChar(240)
+  body          String         @db.Text
+  channel       Channel
+  status        FeedbackStatus @default(NEW)
+  sentiment     Sentiment      @default(NEUTRAL)
+  language      String         @default("en") @db.VarChar(16)
+  sourceUrl     String?        @db.Text
+  priority      Int            @default(0)
+  score         Decimal?       @db.Decimal(8, 4)
+  metadata      Json           @default("{}")
+  receivedAt    DateTime       @default(now())
+  reviewedAt    DateTime?
+  actionedAt    DateTime?
+  createdById   String?        @db.Uuid
+  assignedToId  String?        @db.Uuid
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy     User?           @relation("FeedbackCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  assignedTo    User?           @relation("FeedbackAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  feedbackTheme FeedbackTheme[]
+  embeddings    Embedding[]
+
+  @@unique([workspaceId, channel, externalId])
+  @@index([workspaceId, status, receivedAt])
+  @@index([workspaceId, sentiment, receivedAt])
+  @@index([workspaceId, channel, receivedAt])
+  @@index([workspaceId, assignedToId, status])
+  @@index([workspaceId, deletedAt])
+  @@index([createdById])
+  @@map("feedback")
+}
+
+model Theme {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @db.Uuid
+  name        String    @db.VarChar(160)
+  slug        String    @db.VarChar(120)
+  description String?   @db.Text
+  color       String    @default("#14b8a6") @db.VarChar(16)
+  confidence  Decimal?  @db.Decimal(5, 4)
+  isArchived  Boolean   @default(false)
+  metadata    Json      @default("{}")
+  createdById String?   @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy     User?           @relation("ThemeCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  feedbackTheme FeedbackTheme[]
+  embeddings    Embedding[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId, isArchived, deletedAt])
+  @@index([workspaceId, createdAt])
+  @@index([createdById])
+  @@map("themes")
+}
+
+model FeedbackTheme {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  feedbackId  String   @db.Uuid
+  themeId     String   @db.Uuid
+  confidence  Decimal  @default(1.0) @db.Decimal(5, 4)
+  assignedBy  String   @default("ai") @db.VarChar(40)
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  feedback  Feedback  @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  theme     Theme     @relation(fields: [themeId], references: [id], onDelete: Cascade)
+
+  @@unique([feedbackId, themeId])
+  @@index([workspaceId, themeId, confidence])
+  @@index([workspaceId, feedbackId])
+  @@map("feedback_themes")
+}
+
+model Embedding {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @db.Uuid
+  feedbackId  String?   @db.Uuid
+  themeId     String?   @db.Uuid
+  messageId   String?   @db.Uuid
+  contentHash String    @db.VarChar(96)
+  provider    String    @db.VarChar(80)
+  model       String    @db.VarChar(120)
+  dimensions  Int
+  vector      Float[]
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  feedback  Feedback? @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  theme     Theme?    @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  message   Message?  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, contentHash, model])
+  @@index([workspaceId, feedbackId])
+  @@index([workspaceId, themeId])
+  @@index([workspaceId, messageId])
+  @@index([workspaceId, provider, model])
+  @@map("embeddings")
+}
+
+model Report {
+  id          String       @id @default(uuid()) @db.Uuid
+  workspaceId String       @db.Uuid
+  createdById String?      @db.Uuid
+  title       String       @db.VarChar(220)
+  slug        String       @db.VarChar(140)
+  description String?      @db.Text
+  status      ReportStatus @default(DRAFT)
+  filters     Json         @default("{}")
+  metrics     Json         @default("{}")
+  narrative   String?      @db.Text
+  scheduledAt DateTime?
+  generatedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy     User?          @relation("ReportCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  notifications Notification[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId, status, createdAt])
+  @@index([workspaceId, scheduledAt])
+  @@index([createdById])
+  @@map("reports")
+}
+
+model Notification {
+  id          String             @id @default(uuid()) @db.Uuid
+  workspaceId String             @db.Uuid
+  userId      String?            @db.Uuid
+  reportId    String?            @db.Uuid
+  type        NotificationType
+  status      NotificationStatus @default(UNREAD)
+  title       String             @db.VarChar(180)
+  body        String?            @db.Text
+  actionUrl   String?            @db.Text
+  metadata    Json               @default("{}")
+  readAt      DateTime?
+  readById    String?            @db.Uuid
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  report    Report?   @relation(fields: [reportId], references: [id], onDelete: SetNull)
+  readBy    User?     @relation("NotificationReadBy", fields: [readById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, userId, status, createdAt])
+  @@index([workspaceId, type, createdAt])
+  @@index([workspaceId, deletedAt])
+  @@index([reportId])
+  @@map("notifications")
+}
+
+model Conversation {
+  id          String             @id @default(uuid()) @db.Uuid
+  workspaceId String             @db.Uuid
+  userId      String?            @db.Uuid
+  title       String             @db.VarChar(220)
+  status      ConversationStatus @default(OPEN)
+  metadata    Json               @default("{}")
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages  Message[]
+
+  @@index([workspaceId, userId, updatedAt])
+  @@index([workspaceId, status, updatedAt])
+  @@index([workspaceId, deletedAt])
+  @@map("conversations")
+}
+
+model Message {
+  id             String      @id @default(uuid()) @db.Uuid
+  workspaceId    String      @db.Uuid
+  conversationId String      @db.Uuid
+  userId         String?     @db.Uuid
+  role           MessageRole
+  content        String      @db.Text
+  citations      Json        @default("[]")
+  metadata       Json        @default("{}")
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  embeddings   Embedding[]
+
+  @@index([workspaceId, conversationId, createdAt])
+  @@index([workspaceId, userId, createdAt])
+  @@index([workspaceId, deletedAt])
+  @@map("messages")
+}
+
+model AuditLog {
+  id          String      @id @default(uuid()) @db.Uuid
+  workspaceId String      @db.Uuid
+  actorId     String?     @db.Uuid
+  action      AuditAction
+  entityType  String      @db.VarChar(80)
+  entityId    String?     @db.Uuid
+  summary     String      @db.VarChar(260)
+  before      Json?
+  after       Json?
+  ipAddress   String?     @db.VarChar(45)
+  userAgent   String?     @db.Text
+  metadata    Json        @default("{}")
+  createdAt   DateTime    @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actor     User?     @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, actorId, createdAt])
+  @@index([workspaceId, entityType, entityId])
+  @@index([workspaceId, action, createdAt])
+  @@map("audit_logs")
+}

@@ -14,11 +14,14 @@ export type ApiMeta = {
 };
 
 export type ApiSuccessResponse<TData> = {
+  success: true;
+  message?: string;
   data: TData;
   meta: ApiMeta;
 };
 
 export type ApiErrorResponse = {
+  success: false;
   error: {
     code: ApiErrorCode;
     message: string;

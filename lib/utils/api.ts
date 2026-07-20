@@ -9,8 +9,10 @@ type ApiErrorOptions = {
   details?: unknown;
 };
 
-export function apiSuccess<TData>(data: TData, init?: ResponseInit) {
+export function apiSuccess<TData>(data: TData, init?: ResponseInit & { message?: string }) {
   const body: ApiSuccessResponse<TData> = {
+    success: true,
+    ...(init?.message ? { message: init.message } : {}),
     data,
     meta: {
       requestId: crypto.randomUUID(),
@@ -18,11 +20,17 @@ export function apiSuccess<TData>(data: TData, init?: ResponseInit) {
     },
   };
 
-  return NextResponse.json(body, init);
+  const responseInit = init ? { ...init } : {};
+  if ("message" in responseInit) {
+    delete (responseInit as Record<string, unknown>).message;
+  }
+
+  return NextResponse.json(body, responseInit);
 }
 
 export function apiError({ code, message, status = 400, details }: ApiErrorOptions) {
   const body: ApiErrorResponse = {
+    success: false,
     error: {
       code,
       message,

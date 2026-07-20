@@ -1,4 +1,4 @@
-export const publicRoutes = ["/login", "/signup", "/forgot-password", "/verify-email"] as const;
+export const publicRoutes = ["/login", "/signup", "/forgot-password", "/verify-email", "/invite"] as const;
 
 export const protectedRoutePrefixes = [
   "/dashboard",

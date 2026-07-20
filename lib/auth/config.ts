@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import type { AppRole } from "@/types/auth";
 
 export const authConfig = {
   ...(process.env.AUTH_SECRET ? { secret: process.env.AUTH_SECRET } : {}),
@@ -14,12 +15,23 @@ export const authConfig = {
   },
   providers: [],
   callbacks: {
-    session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
+    jwt({ token, user }) {
+      if (user) {
+        const typedUser = user as { id?: string; workspaceId?: string; role?: AppRole };
+        token.id = typedUser.id;
+        token.workspaceId = typedUser.workspaceId;
+        token.role = typedUser.role;
       }
-
+      return token;
+    },
+    session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.workspaceId = token.workspaceId as string;
+        session.user.role = token.role as AppRole;
+      }
       return session;
     },
   },
 } satisfies NextAuthConfig;
+

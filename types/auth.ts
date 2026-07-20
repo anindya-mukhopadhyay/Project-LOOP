@@ -1,4 +1,6 @@
-export type AppRole = "owner" | "admin" | "manager" | "analyst" | "member" | "viewer";
+import type { Role } from "@prisma/client";
+
+export type AppRole = Role;
 
 export type Permission =
   | "workspace:read"
@@ -19,3 +21,4 @@ export type AuthenticatedActor = {
   role: AppRole;
   permissions: Permission[];
 };
+

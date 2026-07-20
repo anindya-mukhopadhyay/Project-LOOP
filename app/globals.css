@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 210 12% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 12% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 12% 12%;
+    --primary: 172 66% 34%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 16% 94%;
+    --secondary-foreground: 210 12% 18%;
+    --muted: 210 16% 94%;
+    --muted-foreground: 210 8% 42%;
+    --accent: 34 92% 55%;
+    --accent-foreground: 28 52% 12%;
+    --destructive: 0 76% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 18% 88%;
+    --input: 210 18% 88%;
+    --ring: 172 66% 34%;
+    --radius: 0.75rem;
+    --sidebar-background: 210 18% 98%;
+    --sidebar-foreground: 210 12% 18%;
+    --sidebar-border: 210 18% 88%;
+  }
+
+  .dark {
+    --background: 210 14% 7%;
+    --foreground: 210 18% 94%;
+    --card: 210 13% 10%;
+    --card-foreground: 210 18% 94%;
+    --popover: 210 13% 10%;
+    --popover-foreground: 210 18% 94%;
+    --primary: 172 70% 44%;
+    --primary-foreground: 180 62% 9%;
+    --secondary: 210 12% 15%;
+    --secondary-foreground: 210 18% 90%;
+    --muted: 210 12% 15%;
+    --muted-foreground: 210 9% 62%;
+    --accent: 36 96% 58%;
+    --accent-foreground: 28 55% 12%;
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 12% 18%;
+    --input: 210 12% 18%;
+    --ring: 172 70% 44%;
+    --sidebar-background: 210 14% 8%;
+    --sidebar-foreground: 210 18% 90%;
+    --sidebar-border: 210 12% 17%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    min-height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100%;
+    background:
+      radial-gradient(circle at 16% 0%, hsl(var(--primary) / 0.12), transparent 28rem),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+    @apply text-foreground;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1,
+      "ss01" 1;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.28);
+    color: hsl(var(--foreground));
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+@layer utilities {
+  .surface-grid {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.35) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.35) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+}

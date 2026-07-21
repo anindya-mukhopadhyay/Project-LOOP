@@ -8,5 +8,10 @@ export * from "./invitation.service";
 export * from "./feedback.service";
 export * from "./import.service";
 export * from "./analytics.service";
-
-
+export * from "./ai/ai.service";
+export * from "./ai/classification.service";
+export * from "./ai/ai-metrics.service";
+export * from "./ai/ai-events.service";
+export * from "./ai/prompt.service";
+export * from "./ai/provider-registry.service";
+export * from "./ai/retry.service";

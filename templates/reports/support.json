@@ -1,0 +1,15 @@
+{
+  "id": "support",
+  "name": "Customer Support Insights",
+  "description": "Overview of support ticket themes, common complaints, and resolution friction.",
+  "sections": [
+    "KEY_METRICS",
+    "CUSTOMER_SENTIMENT",
+    "THEME_INTELLIGENCE",
+    "SUPPORTING_EVIDENCE",
+    "RECOMMENDATIONS"
+  ],
+  "defaultFilters": {
+    "channel": ["SUPPORT", "EMAIL"]
+  }
+}

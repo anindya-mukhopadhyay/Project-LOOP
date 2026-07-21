@@ -1,0 +1,15 @@
+{
+  "id": "engineering",
+  "name": "Engineering Bugs & Stability",
+  "description": "Deep dive into product bugs, stability issues, and technical debt themes.",
+  "sections": [
+    "EXECUTIVE_SUMMARY",
+    "THEME_INTELLIGENCE",
+    "CUSTOMER_SENTIMENT",
+    "SUPPORTING_EVIDENCE",
+    "RECOMMENDATIONS"
+  ],
+  "defaultFilters": {
+    "themes": ["bugs", "performance", "stability", "downtime"]
+  }
+}

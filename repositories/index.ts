@@ -10,3 +10,5 @@ export * from "./ai.repository";
 export * from "./theme.repository";
 export * from "./theme-analytics.repository";
 export * from "./theme-relationship.repository";
+export * from "./report.repository";
+export * from "./report-template.repository";

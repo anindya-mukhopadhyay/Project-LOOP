@@ -1,0 +1,16 @@
+{
+  "id": "product",
+  "name": "Product Features & Requests",
+  "description": "Analysis of feature requests, usability issues, and user experience.",
+  "sections": [
+    "EXECUTIVE_SUMMARY",
+    "THEME_INTELLIGENCE",
+    "CUSTOMER_SENTIMENT",
+    "BUSINESS_IMPACT",
+    "SUPPORTING_EVIDENCE",
+    "RECOMMENDATIONS"
+  ],
+  "defaultFilters": {
+    "themes": ["feature-request", "ux", "usability", "missing-feature"]
+  }
+}

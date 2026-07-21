@@ -1,0 +1,17 @@
+{
+  "id": "executive-summary",
+  "name": "Executive Summary",
+  "description": "High-level overview of business health, risks, and strategic recommendations.",
+  "sections": [
+    "EXECUTIVE_SUMMARY",
+    "BUSINESS_IMPACT",
+    "THEME_INTELLIGENCE",
+    "CUSTOMER_SENTIMENT",
+    "RECOMMENDATIONS",
+    "APPENDIX"
+  ],
+  "defaultFilters": {
+    "priority": "high",
+    "sentiment": "negative"
+  }
+}

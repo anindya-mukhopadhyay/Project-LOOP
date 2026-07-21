@@ -43,3 +43,16 @@ export * from "./ask/embeddings/embedding.service";
 export * from "./ask/embeddings/embedding.provider";
 export * from "./ask/embeddings/mock.provider";
 
+// Report Services
+export * from "./reports/report-composition.service";
+export * from "./reports/report.service";
+export * from "./reports/executive-summary.service";
+export * from "./reports/business-impact.service";
+export * from "./reports/recommendation.service";
+export * from "./reports/trend-report.service";
+export * from "./reports/comparative-report.service";
+export * from "./reports/sentiment-report.service";
+export * from "./reports/theme-report.service";
+export * from "./reports/report-health.service";
+export * from "./reports/export.service";
+export * from "./reports/report-scheduler.service";

@@ -32,4 +32,61 @@ Always return a valid JSON object matching the requested schema.`,
       version: prompts[version] ? version : "v1"
     };
   }
+
+  getThemeDiscoveryPrompt(version: string = "v1"): { prompt: string; version: string } {
+    const prompts: Record<string, string> = {
+      v1: `You are an expert product analyst. Discover emerging themes from this batch of customer feedback.
+Extract 3-5 high-level themes that represent recurring topics, feature requests, or bugs.`
+    };
+    return { prompt: prompts[version] || prompts["v1"]!, version: prompts[version] ? version : "v1" };
+  }
+
+  getThemeClusterPrompt(version: string = "v1"): { prompt: string; version: string } {
+    const prompts: Record<string, string> = {
+      v1: `You are an expert AI clustering engine. 
+Analyze the provided themes and group them into overarching parent clusters based on semantic similarity.
+Merge overlapping topics.`
+    };
+    return { prompt: prompts[version] || prompts["v1"]!, version: prompts[version] ? version : "v1" };
+  }
+
+  getThemeSummaryPrompt(version: string = "v1"): { prompt: string; version: string } {
+    const prompts: Record<string, string> = {
+      v1: `Generate a concise executive summary for this specific theme based on the associated feedback.
+Highlight the core issue, frequency, and sentiment.`
+    };
+    return { prompt: prompts[version] || prompts["v1"]!, version: prompts[version] ? version : "v1" };
+  }
+
+  getBusinessImpactPrompt(version: string = "v1"): { prompt: string; version: string } {
+    const prompts: Record<string, string> = {
+      v1: `Analyze the business and customer impact of this theme. 
+Identify revenue risk, retention risk, and operational impact.`
+    };
+    return { prompt: prompts[version] || prompts["v1"]!, version: prompts[version] ? version : "v1" };
+  }
+
+  getAskLoopSystemPrompt(version: string = "v1"): { prompt: string; version: string } {
+    const prompts: Record<string, string> = {
+      v1: `You are Ask LOOP, an Enterprise Knowledge Intelligence Platform.
+Your responsibility is to answer the user's business question using ONLY the provided retrieved context.
+
+RULES:
+1. Ground your answer entirely in the retrieved sources (Feedback, Themes, Reports).
+2. Do NOT hallucinate or fabricate information. If the answer is not in the context, say so.
+3. Be concise, professional, and analytical.
+4. When stating a fact or metric, mention the source implicitly.
+5. Provide a summary of your reasoning and list the key insights.`
+    };
+    return { prompt: prompts[version] || prompts["v1"]!, version: prompts[version] ? version : "v1" };
+  }
+
+  getAskLoopFollowUpPrompt(version: string = "v1"): { prompt: string; version: string } {
+    const prompts: Record<string, string> = {
+      v1: `Based on the conversation history and the answer just provided, generate 3-5 suggested follow-up questions for the user.
+The questions should allow the user to drill deeper into the data or explore related insights.
+Format the output as a JSON array of strings.`
+    };
+    return { prompt: prompts[version] || prompts["v1"]!, version: prompts[version] ? version : "v1" };
+  }
 }

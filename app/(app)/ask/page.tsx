@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 
-import { ModuleShell } from "@/components/common/module-shell";
-import { appModules } from "@/components/navigation/app-navigation";
+import { AskLoopDashboard } from "@/components/ask/ask-loop-dashboard";
 
 export const metadata: Metadata = {
-  title: "Ask",
+  title: "Ask LOOP",
 };
 
 export default function AskPage() {
-  return <ModuleShell module={appModules.ask} />;
+  return (
+    <div className="h-full">
+      <AskLoopDashboard />
+    </div>
+  );
 }

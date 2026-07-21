@@ -7,3 +7,6 @@ export * from "./audit.repository";
 export * from "./feedback.repository";
 export * from "./analytics.repository";
 export * from "./ai.repository";
+export * from "./theme.repository";
+export * from "./theme-analytics.repository";
+export * from "./theme-relationship.repository";

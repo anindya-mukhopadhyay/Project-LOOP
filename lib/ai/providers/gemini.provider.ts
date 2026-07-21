@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { AIProvider } from "../ai-provider.interface";
 import type { NormalizedAiResponse, AiProviderType } from "@/schemas/ai.schema";
 

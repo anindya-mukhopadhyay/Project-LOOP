@@ -104,7 +104,7 @@ export function AIClassificationPanel({ metadata, onRetry, isRetrying }: AIClass
                 <span className="text-xs font-semibold text-muted-foreground uppercase">Supporting Evidence</span>
                 <ul className="list-disc pl-5 mt-1 space-y-1">
                   {classification.supportingEvidence.map((evidence, i) => (
-                    <li key={i} className="text-sm text-gray-700 italic">"{evidence}"</li>
+                    <li key={i} className="text-sm text-gray-700 italic">&quot;{evidence}&quot;</li>
                   ))}
                 </ul>
               </div>
